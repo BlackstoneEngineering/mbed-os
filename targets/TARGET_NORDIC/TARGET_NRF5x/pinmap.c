@@ -46,38 +46,19 @@ void pin_mode(PinName pin, PinMode mode)
 // multiplexed pinmap, based on PinMap, add assigned HW Instance
 typedef struct{
 	PinName Pin0;
-	int HardwareInstance;
-} MultiPinMap1;
-
-typedef struct{
-	PinName Pin0;
-	PinName Pin1;
-	int HardwareInstance;
-} MultiPinMap2;
-
-typedef struct{
-	PinName Pin0;
-	PinName Pin1;
-	PinName Pin2;
-	int HardwareInstance;
-} MultiPinMap3;
-
-typedef struct{
-	PinName Pin0;
 	PinName Pin1;
 	PinName Pin2;
 	PinName Pin3;
-	int HardwareInstance;
-} MultiPinMap4;
+} MultiPinMap;
 
 
 // TODO : Move to PeripheralPins.h 
 // Optional defines of pinmaps. User can impliment them or not. 
 // If user impliments these then they will be used, otherwise runtime configuration will be used
-MBED_WEAK const MultiPinMap4 SPI_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap2 I2C_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap2 UART_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap1 PWM_Pinmap[]	{ };
+MBED_WEAK const MultiPinMap SPI_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap I2C_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap UART_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap PWM_Pinmap[]	{ };
 
 // Add additional peripherals here
 
@@ -85,13 +66,13 @@ MBED_WEAK const MultiPinMap1 PWM_Pinmap[]	{ };
 // Optional: Add Peripherals here
 /*
 /************SPI***************
-const MultiPinMap4 SPI_Pinmap[]= {
+const MultiPinMap SPI_Pinmap[]= {
 	{SPI1_MOSI, SPI1_MISO, SPI1_SS, SPI1_SCLK, 0},// SPI1 on Hardware Instance 0
 	{SPI2_MOSI, SPI2_MISO, SPI2_SS, SPI2_SCLK, 1}
 };
 
 /************I2C***************
-const MultiPinMap2 I2C_Pinmap[]={
+const MultiPinMap I2C_Pinmap[]={
 	{I2C1_SDA, I2C1_SDL, 1}, // I2C1 on Hardware Instance 1
 	{I2C2_SDA, I2C2_SDL, 4}  // I2C2 on Hardware Instance 4
 
@@ -107,12 +88,67 @@ const MultiPinMap2 I2C_Pinmap[]={
 #define NUM_HW_PERIPHERAL_PWM 5 
 
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
-#ifndef
-const MultiPinMap4 SPI_Blocks[NUM_HW_PERIPHERAL_SPI]	={ 0 };
-const MultiPinMap2 I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
-const MultiPinMap2 UART_Blocks[NUM_HW_PERIPHERAL_UART]  ={ 0 };
-const MultiPinMap1 PWM_Blocks[NUM_HW_PERIPHERAL_PWM]	={ 0 };
+const MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={ 0 };
+const MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
+const MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={ 0 };
+const MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={ 0 };
 
+
+// Helper Function to parse block array
+// Input: array to parse, MultiPinMap to scan for
+// Output: Hardware instance
+// Error: -1 if the block array is full. 
+int parse_block_array(MultiPinMap pins, const MultiPinMap * array){
+	int HWInstance = 0;
+	int NUM_HW_PERIPHERAL = sizeof(array)/sizeof(pins);
+	// loop through multimap peripheral array looking for blank spot.
+	for(HWInstance=0; HWInstance < NUM_HW_PERIPHERAL; HWInstance++ ){
+		// eq check to see if the pinmap is already recorded
+		if(		pins.Pin0 ==array[HWInstance].Pin0
+			 && pins.Pin1 == array[HWInstance].Pin1
+			 && pins.Pin2 == array[HWInstance].Pin2
+			 && pins.Pin3 == array[HWInstance].Pin3
+			){
+			return HWInstance;
+		}
+
+		// If spot is empty fill it with passed in value
+		if(	array[HWInstance].Pin0 == 0 
+			&& array[HWInstance].Pin1 == 0 
+			&& array[HWInstance].Pin2 == 0 
+			&& array[HWInstance].Pin3 == 0 
+			){ 
+				array[HWInstance] = pins; // assign to first blank spot found
+				return HWInstance; // return index as hardware instance
+		}
+	}
+	// See if buffer was full (ie no peripheral blocks available to assign to)
+	// if(HWInstance == NUM_HW_PERIPHERAL){
+		printf("[ERR] There are %d blocks available and all are full. File: %s, Line %d", NUM_HW_PERIPHERAL,__FILE__,__LINE__);
+		return -1;
+	//}
+}
+
+// Helper function to parse predefined pinmaps
+// Input : pins to look for in the predefined pinmap
+// Output: hardware instance
+// Error: -1 if the pins are not in the pinmap
+int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap){
+	int HWInstance = 0;
+	int NUM_HW_PERIPHERAL = sizeof(pinmap)/sizeof(pins);
+	for(HWInstance = 0; HWInstance < NUM_HW_PERIPHERAL; HWInstance++){
+		if(		pins.Pin0 == pinmap[HWInstance].Pin0
+			 && pins.Pin1 == pinmap[HWInstance].Pin1
+			 && pins.Pin2 == pinmap[HWInstance].Pin2
+			 && pins.Pin3 == pinmap[HWInstance].Pin3
+			){
+			return HWInstance;
+		}
+	}
+	// Searched entire array, no matches found, return error
+	printf("[ERR] MultiPinMap not found in pre-defined list. File: %s, Line %d", __FILE__,__LINE__);
+	return -1;
+}
 
 // Input: multiplexed pin enum, multiplexed pin enum array to determine type
 // Output: Hardware Instance, positive number. Negative number is error.
@@ -120,88 +156,28 @@ const MultiPinMap1 PWM_Blocks[NUM_HW_PERIPHERAL_PWM]	={ 0 };
 // 1) Pinmaps are defined, return hardware instance from PeripheralPins.h
 // 2) Pinmaps are not defined, do best effort to allocate to hardware instance
 // 3) Pinmaps are defineed, but input is not in them. This is a user error and should not happen.
-int multi_peripheral1(MultiPinMap1 pins, const MultiPinMap1 * map ){
+int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
 	const int size_pinmap = 1;
-	if(sizeof(map) == 0){ // no custom pinmap found, keep track
+	if(sizeof(map) == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
 		if(map == SPI_Pinmap){
-			int x = 0;
-			// loop through multimap peripheral array looking for blank spot.
-			for(x=0;(x<NUM_HW_PERIPHERAL_SPI) && (SPI_Blocks[x]!={0});x++){
-				// eq check to see if the pinmap is already recorded
-				if(SPI_Blocks[x].Pin0 == pins.Pin0 
-					// && pins.Pin1 == SPI_Pinmap[x].Pin1
-					// && pins.Pin2 == SPI_Pinmap[x].Pin2
-					// && pins.Pin3 == SPI_Pinmap[x].Pin3
-					){
-					return SPI_Blocks[x].HardwareInstance;
-				}
-
-				// If spot is empty fill it with passed in value
-				if(SPI_Blocks[x] == {0}){
-					SPI_Blocks[x] = pins; // assign to first blank spot found
-					SPI_Blocks.HardwareInstance = x; // update Hardware Instance
-					return x; // 
-				}
-			}
-			// See if buffer was full (ie no peripheral blocks available to assign to)
-			if(x == NUM_HW_PERIPHERAL_SPI){
-				printf("[ERR] There are %d blocks available and all are full. File: %s, Line %d", NUM_HW_PERIPHERAL_SPI,__FILE__,__LINE__);
-				return -1;
-			}
-
-		}else if(map == I2C_Blocks) {
-
-		}else if(map == UART_Blocks) {
-
-		}else if(map == PWM_Blocks) {
-
+			return parse_block_array(pins, SPI_Blocks);
+		}else if(map == I2C_Pinmap) {
+			return parse_block_array(pins, I2C_Blocks);
+		}else if(map == UART_Pinmap) {
+			return parse_block_array(pins, UART_Blocks);
+		}else if(map == PWM_Pinmap) {
+			return parse_block_array(pins, PWM_Blocks);
 		}
 
-	}else{ // Pinmap defined, return instance or error as approrpiate
+	}else{ // Pinmap defined, return instance from pinmap or error as approrpiate
 		if(map == SPI_Pinmap){
-			int x = 0;
-			int NumHWPeripherals = sizeof(SPI_Pinmap)/sizeof(pins);
-			for(x=0;x<NumHWPeripherals;x++){
-				if(pins.Pin0 == SPI_Pinmap[x].Pin0
-					// && pins.Pin1 == SPI_Pinmap[x].Pin1
-					// && pins.Pin2 == SPI_Pinmap[x].Pin2
-					// && pins.Pin3 == SPI_Pinmap[x].Pin3
-					){
-					return SPI_Pinmap.HardwareInstance;
-				}
-			}
-			// Searched entire array, no matches found, return error
-			printf("[ERR] MultiPinMap not found in pre-defined list. File: %s, Line %d", __FILE__,__LINE__);
-			return -1;
-		}else if(map == I2C_Blocks) {
-
-		}else if(map == UART_Blocks) {
-
-		}else if(map == PWM_Blocks) {
-
+			return parse_pinmap_array(pins, SPI_Pinmap);
+		}else if(map == I2C_Blocks){
+			return parse_pinmap_array(pins, I2C_Pinmap);
+		}else if(map == UART_Blocks){
+			return parse_pinmap_array(pins, UART_Pinmap);
+		}else if(map == PWM_Blocks){
+			return parse_pinmap_array(pins, PWM_Pinmap);
 		}
-
 	}
 }
-
-
-int multi_peripheral2(MultiPinMap2 pins, const MultiPinMap2 * map ){
-
-	// TODO: add logic here to track multiplexed_pins structures and pair them to number of hardware instances. 
-}
-
-int multi_peripheral3(MultiPinMap3 pins, const MultiPinMap3 * map ){
-
-	// TODO: add logic here to track multiplexed_pins structures and pair them to number of hardware instances. 
-}
-
-int multi_peripheral4(MultiPinMap4 pins, const MultiPinMap4 * map ){
-
-	// TODO: add logic here to track multiplexed_pins structures and pair them to number of hardware instances. 
-}
-
-
-
-
-
-
