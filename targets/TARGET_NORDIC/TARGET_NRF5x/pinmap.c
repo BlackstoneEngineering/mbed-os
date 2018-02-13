@@ -74,10 +74,10 @@ typedef struct{
 // TODO : Move to PeripheralPins.h 
 // Optional defines of pinmaps. User can impliment them or not. 
 // If user impliments these then they will be used, otherwise runtime configuration will be used
-MBED_WEAK const MultiPinMap4 SPI[] 	{ };
-MBED_WEAK const MultiPinMap2 I2C[] 	{ };
-MBED_WEAK const MultiPinMap2 UART[] { };
-MBED_WEAK const MultiPinMap1 PWM[]	{ };
+MBED_WEAK const MultiPinMap4 SPI_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap2 I2C_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap2 UART_Pinmap[] 	{ };
+MBED_WEAK const MultiPinMap1 PWM_Pinmap[]	{ };
 
 // Add additional peripherals here
 
@@ -85,17 +85,17 @@ MBED_WEAK const MultiPinMap1 PWM[]	{ };
 // Optional: Add Peripherals here
 /*
 /************SPI***************
-const MultiPinMap4 SPI[]= {
+const MultiPinMap4 SPI_Pinmap[]= {
 	{SPI1_MOSI, SPI1_MISO, SPI1_SS, SPI1_SCLK, 0},// SPI1 on Hardware Instance 0
 	{SPI2_MOSI, SPI2_MISO, SPI2_SS, SPI2_SCLK, 1}
-}
+};
 
 /************I2C***************
-const MultiPinMap2 I2C[]={
+const MultiPinMap2 I2C_Pinmap[]={
 	{I2C1_SDA, I2C1_SDL, 1}, // I2C1 on Hardware Instance 1
 	{I2C2_SDA, I2C2_SDL, 4}  // I2C2 on Hardware Instance 4
 
-}
+};
 */
 
 // Hardare instances, #defined. Move to PinNames.h ?
@@ -107,6 +107,7 @@ const MultiPinMap2 I2C[]={
 #define NUM_HW_PERIPHERAL_PWM 5 
 
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
+#ifndef
 const MultiPinMap4 SPI_Blocks[NUM_HW_PERIPHERAL_SPI]	={ 0 };
 const MultiPinMap2 I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
 const MultiPinMap2 UART_Blocks[NUM_HW_PERIPHERAL_UART]  ={ 0 };
@@ -122,13 +123,24 @@ const MultiPinMap1 PWM_Blocks[NUM_HW_PERIPHERAL_PWM]	={ 0 };
 int multi_peripheral1(MultiPinMap1 pins, const MultiPinMap1 * map ){
 	const int size_pinmap = 1;
 	if(sizeof(map) == 0){ // no custom pinmap found, keep track
-		// TODO: impliment method to keep track of pins
-		if(map == SPI){
+		if(map == SPI_Pinmap){
 			int x = 0;
 			// loop through multimap peripheral array looking for blank spot.
 			for(x=0;(x<NUM_HW_PERIPHERAL_SPI) && (SPI_Blocks[x]!={0});x++){
+				// eq check to see if the pinmap is already recorded
+				if(SPI_Blocks[x].Pin0 == pins.Pin0 
+					// && pins.Pin1 == SPI_Pinmap[x].Pin1
+					// && pins.Pin2 == SPI_Pinmap[x].Pin2
+					// && pins.Pin3 == SPI_Pinmap[x].Pin3
+					){
+					return SPI_Blocks[x].HardwareInstance;
+				}
+
+				// If spot is empty fill it with passed in value
 				if(SPI_Blocks[x] == {0}){
 					SPI_Blocks[x] = pins; // assign to first blank spot found
+					SPI_Blocks.HardwareInstance = x; // update Hardware Instance
+					return x; // 
 				}
 			}
 			// See if buffer was full (ie no peripheral blocks available to assign to)
@@ -137,26 +149,35 @@ int multi_peripheral1(MultiPinMap1 pins, const MultiPinMap1 * map ){
 				return -1;
 			}
 
-		}else if(map == I2C) {
+		}else if(map == I2C_Blocks) {
 
-		}else if(map == UART) {
+		}else if(map == UART_Blocks) {
 
-		}else if(map == PWM) {
+		}else if(map == PWM_Blocks) {
 
 		}
 
-	}else{ // Pinmap defined, return instance as approrpiate
-		// TODO: search array for matches of input instance, return match or return error if not found. 
-		if(map == SPI){
+	}else{ // Pinmap defined, return instance or error as approrpiate
+		if(map == SPI_Pinmap){
 			int x = 0;
-			for(x=0;x<NUM_HW_PERIPHERAL_SPI;x++){
-				// TODO: impliment equals like check
+			int NumHWPeripherals = sizeof(SPI_Pinmap)/sizeof(pins);
+			for(x=0;x<NumHWPeripherals;x++){
+				if(pins.Pin0 == SPI_Pinmap[x].Pin0
+					// && pins.Pin1 == SPI_Pinmap[x].Pin1
+					// && pins.Pin2 == SPI_Pinmap[x].Pin2
+					// && pins.Pin3 == SPI_Pinmap[x].Pin3
+					){
+					return SPI_Pinmap.HardwareInstance;
+				}
 			}
-		}else if(map == I2C) {
+			// Searched entire array, no matches found, return error
+			printf("[ERR] MultiPinMap not found in pre-defined list. File: %s, Line %d", __FILE__,__LINE__);
+			return -1;
+		}else if(map == I2C_Blocks) {
 
-		}else if(map == UART) {
+		}else if(map == UART_Blocks) {
 
-		}else if(map == PWM) {
+		}else if(map == PWM_Blocks) {
 
 		}
 
