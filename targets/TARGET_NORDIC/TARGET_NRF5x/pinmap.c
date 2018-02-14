@@ -93,6 +93,44 @@ const MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
 const MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={ 0 };
 const MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={ 0 };
 
+// Helper Function to dissasociate pinmap from array. Probable use is in a deconstructor. 
+// Input : 
+// Output : True (success), False (failure) - failures only happen if pins are not in pinmap array
+bool clear_block_array(const MultiPinMap * array, int hwinstance){
+	if(map == SPI_Pinmap){
+		// check that index is within bound of array
+		if(hwinstance < (sizeof(SPI_Blocks)/sizeof(MultiPinMap))){
+			SPI_Blocks[hwinstance] = {0};
+			return true;
+		}else{ // hwinstance is out of bounds of array, this is an error
+			return false; 
+		}
+	}else if(map == I2C_Pinmap) {
+		// check that index is within bound of array
+		if(hwinstance < (sizeof(I2C_Blocks)/sizeof(MultiPinMap))){
+			I2C_Blocks[hwinstance] = {0};
+			return true;
+		}else{ // hwinstance is out of bounds of array, this is an error
+			return false; 
+		}
+	}else if(map == UART_Pinmap) {
+		// check that index is within bound of array
+		if(hwinstance < (sizeof(UART_Blocks)/sizeof(MultiPinMap))){
+			UART_Blocks[hwinstance] = {0};
+			return true;
+		}else{ // hwinstance is out of bounds of array, this is an error
+			return false; 
+		}
+	}else if(map == PWM_Pinmap) {
+		// check that index is within bound of array
+		if(hwinstance < (sizeof(PWM_Blocks)/sizeof(MultiPinMap))){
+			PWM_Blocks[hwinstance] = {0};
+			return true;
+		}else{ // hwinstance is out of bounds of array, this is an error
+			return false; 
+		}
+	}
+}
 
 // Helper Function to parse block array
 // Input: array to parse, MultiPinMap to scan for
