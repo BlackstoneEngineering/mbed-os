@@ -17,6 +17,7 @@
 #include "mbed_error.h"
 #include "pinmap.h"
 #include "nrf_gpio.h"
+#include "mbed_toolchain.h"
 
 void pin_function(PinName pin, int function)
 {
@@ -55,10 +56,10 @@ typedef struct{
 // TODO : Move to PeripheralPins.h 
 // Optional defines of pinmaps. User can impliment them or not. 
 // If user impliments these then they will be used, otherwise runtime configuration will be used
-MBED_WEAK const MultiPinMap SPI_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap I2C_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap UART_Pinmap[] 	{ };
-MBED_WEAK const MultiPinMap PWM_Pinmap[]	{ };
+MBED_WEAK const MultiPinMap SPI_Pinmap[] = {0};
+MBED_WEAK const MultiPinMap I2C_Pinmap[] = {0};
+MBED_WEAK const MultiPinMap UART_Pinmap[] = {0};
+MBED_WEAK const MultiPinMap PWM_Pinmap[] ={0};
 
 // Add additional peripherals here
 
@@ -88,19 +89,20 @@ const MultiPinMap I2C_Pinmap[]={
 #define NUM_HW_PERIPHERAL_PWM 5 
 
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
-const MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={ 0 };
-const MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
-const MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={ 0 };
-const MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={ 0 };
+MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={ 0 };
+MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
+MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={ 0 };
+MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={ 0 };
 
 // Helper Function to dissasociate pinmap from array. Probable use is in a deconstructor. 
 // Input : 
 // Output : True (success), False (failure) - failures only happen if pins are not in pinmap array
-bool clear_block_array(const MultiPinMap * array, int hwinstance){
+bool clear_block_array(const MultiPinMap * map, int hwinstance){
+	MultiPinMap blank = {0};
 	if(map == SPI_Pinmap){
 		// check that index is within bound of array
 		if(hwinstance < (sizeof(SPI_Blocks)/sizeof(MultiPinMap))){
-			SPI_Blocks[hwinstance] = {0};
+			SPI_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
@@ -108,7 +110,7 @@ bool clear_block_array(const MultiPinMap * array, int hwinstance){
 	}else if(map == I2C_Pinmap) {
 		// check that index is within bound of array
 		if(hwinstance < (sizeof(I2C_Blocks)/sizeof(MultiPinMap))){
-			I2C_Blocks[hwinstance] = {0};
+			I2C_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
@@ -116,7 +118,7 @@ bool clear_block_array(const MultiPinMap * array, int hwinstance){
 	}else if(map == UART_Pinmap) {
 		// check that index is within bound of array
 		if(hwinstance < (sizeof(UART_Blocks)/sizeof(MultiPinMap))){
-			UART_Blocks[hwinstance] = {0};
+			UART_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
@@ -124,7 +126,7 @@ bool clear_block_array(const MultiPinMap * array, int hwinstance){
 	}else if(map == PWM_Pinmap) {
 		// check that index is within bound of array
 		if(hwinstance < (sizeof(PWM_Blocks)/sizeof(MultiPinMap))){
-			PWM_Blocks[hwinstance] = {0};
+			PWM_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
@@ -136,7 +138,7 @@ bool clear_block_array(const MultiPinMap * array, int hwinstance){
 // Input: array to parse, MultiPinMap to scan for
 // Output: Hardware instance
 // Error: -1 if the block array is full. 
-int parse_block_array(MultiPinMap pins, const MultiPinMap * array){
+int parse_block_array(MultiPinMap pins, MultiPinMap * array){
 	int HWInstance = 0;
 	int NUM_HW_PERIPHERAL = sizeof(array)/sizeof(pins);
 	// loop through multimap peripheral array looking for blank spot.
