@@ -56,10 +56,10 @@ typedef struct{
 // TODO : Move to PeripheralPins.h 
 // Optional defines of pinmaps. User can impliment them or not. 
 // If user impliments these then they will be used, otherwise runtime configuration will be used
-MBED_WEAK const MultiPinMap SPI_Pinmap[] = {0};
-MBED_WEAK const MultiPinMap I2C_Pinmap[] = {0};
-MBED_WEAK const MultiPinMap UART_Pinmap[] = {0};
-MBED_WEAK const MultiPinMap PWM_Pinmap[] ={0};
+extern const MultiPinMap SPI_Pinmap[];
+extern const MultiPinMap I2C_Pinmap[];
+extern const MultiPinMap UART_Pinmap[];
+extern const MultiPinMap PWM_Pinmap[];
 
 // Add additional peripherals here
 
@@ -89,16 +89,16 @@ const MultiPinMap I2C_Pinmap[]={
 #define NUM_HW_PERIPHERAL_PWM 5 
 
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
-MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={ 0 };
-MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 	={ 0 };
-MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={ 0 };
-MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={ 0 };
+MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={{0}};
+MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 		={{0}};
+MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={{0}};
+MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={{0}};
 
 // Helper Function to dissasociate pinmap from array. Probable use is in a deconstructor. 
 // Input : 
 // Output : True (success), False (failure) - failures only happen if pins are not in pinmap array
-bool clear_block_array(const MultiPinMap * map, int hwinstance){
-	MultiPinMap blank = {0};
+bool clear_block_array(const MultiPinMap * map, uint hwinstance){
+	MultiPinMap blank = {NC,NC,NC,NC};
 	if(map == SPI_Pinmap){
 		// check that index is within bound of array
 		if(hwinstance < (sizeof(SPI_Blocks)/sizeof(MultiPinMap))){
@@ -132,6 +132,8 @@ bool clear_block_array(const MultiPinMap * map, int hwinstance){
 			return false; 
 		}
 	}
+	printf("[ERROR] The pinmap is not registered. Please expand the pinmap.c file, %s,%d", __FILE__,__LINE__);
+	return false; 
 }
 
 // Helper Function to parse block array
@@ -197,7 +199,6 @@ int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap){
 // 2) Pinmaps are not defined, do best effort to allocate to hardware instance
 // 3) Pinmaps are defineed, but input is not in them. This is a user error and should not happen.
 int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
-	const int size_pinmap = 1;
 	if(sizeof(map) == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
 		if(map == SPI_Pinmap){
 			return parse_block_array(pins, SPI_Blocks);
@@ -220,4 +221,5 @@ int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
 			return parse_pinmap_array(pins, PWM_Pinmap);
 		}
 	}
+	return -1; // you only get here if there has been an error
 }
