@@ -16,6 +16,9 @@
 #ifndef MBED_PERIPHERALPINS_H
 #define MBED_PERIPHERALPINS_H
 
+#include "pinmap.h"
+#include "PeripheralNames.h"
+
 // TODO: move to pinmap.h, put here temporarily 
 // multiplexed pinmap, based on PinMap, add assigned HW Instance
 typedef struct{
