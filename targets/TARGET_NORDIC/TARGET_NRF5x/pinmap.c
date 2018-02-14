@@ -89,10 +89,10 @@ const MultiPinMap I2C_Pinmap[]={
 #define NUM_HW_PERIPHERAL_PWM 5 
 
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
-MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={{0}};
-MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 		={{0}};
-MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={{0}};
-MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={{0}};
+MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={{NC,NC,NC,NC}};
+MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 		={{NC,NC,NC,NC}};
+MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={{NC,NC,NC,NC}};
+MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={{NC,NC,NC,NC}};
 
 // Helper Function to dissasociate pinmap from array. Probable use is in a deconstructor. 
 // Input : 
