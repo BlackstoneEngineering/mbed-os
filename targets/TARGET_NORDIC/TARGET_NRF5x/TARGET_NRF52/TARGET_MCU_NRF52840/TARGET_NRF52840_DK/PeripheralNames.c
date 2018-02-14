@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "PeripheralPins.h"
+
 // TODO: move this to PeripheralPins.c
 // Optional: Add Peripherals here
 /*

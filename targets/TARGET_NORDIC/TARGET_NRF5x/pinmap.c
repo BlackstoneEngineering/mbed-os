@@ -18,6 +18,7 @@
 #include "pinmap.h"
 #include "nrf_gpio.h"
 #include "mbed_toolchain.h"
+#include "PeripheralPins.h"
 
 void pin_function(PinName pin, int function)
 {
