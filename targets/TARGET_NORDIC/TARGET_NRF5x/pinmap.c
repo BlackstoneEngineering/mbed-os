@@ -43,26 +43,6 @@ void pin_mode(PinName pin, PinMode mode)
 
 // ------------------ Multiplexed Additions -------------------//
 
-// TODO: move to pinmap.h
-// multiplexed pinmap, based on PinMap, add assigned HW Instance
-typedef struct{
-	PinName Pin0;
-	PinName Pin1;
-	PinName Pin2;
-	PinName Pin3;
-} MultiPinMap;
-
-
-// TODO : Move to PeripheralPins.h 
-// Optional defines of pinmaps. User can impliment them or not. 
-// If user impliments these then they will be used, otherwise runtime configuration will be used
-extern const MultiPinMap SPI_Pinmap[];
-extern const MultiPinMap I2C_Pinmap[];
-extern const MultiPinMap UART_Pinmap[];
-extern const MultiPinMap PWM_Pinmap[];
-
-// Add additional peripherals here
-
 // TODO: move this to PeripheralPins.c
 // Optional: Add Peripherals here
 /*
