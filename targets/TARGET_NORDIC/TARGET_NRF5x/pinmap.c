@@ -65,7 +65,7 @@ bool clear_block_array(const MultiPinMap * map, uint hwinstance){
 	MultiPinMap blank = {NC,NC,NC,NC};
 	if(map == SPI_Pinmap){
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(SPI_Blocks)/sizeof(MultiPinMap))){
+		if(hwinstance < (sizeof(SPI_Blocks))){
 			SPI_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
@@ -73,7 +73,7 @@ bool clear_block_array(const MultiPinMap * map, uint hwinstance){
 		}
 	}else if(map == I2C_Pinmap) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(I2C_Blocks)/sizeof(MultiPinMap))){
+		if(hwinstance < (sizeof(I2C_Blocks))){
 			I2C_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
@@ -81,7 +81,7 @@ bool clear_block_array(const MultiPinMap * map, uint hwinstance){
 		}
 	}else if(map == UART_Pinmap) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(UART_Blocks)/sizeof(MultiPinMap))){
+		if(hwinstance < (sizeof(UART_Blocks))){
 			UART_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
@@ -89,14 +89,14 @@ bool clear_block_array(const MultiPinMap * map, uint hwinstance){
 		}
 	}else if(map == PWM_Pinmap) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(PWM_Blocks)/sizeof(MultiPinMap))){
+		if(hwinstance < (sizeof(PWM_Blocks))){
 			PWM_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
 		}
 	}
-	printf("[ERROR] The pinmap is not registered. Please expand the pinmap.c file, %s,%d", __FILE__,__LINE__);
+	printf("\r\n     [ERR] The pinmap is not registered. Please expand the pinmap.c file, %s,%d", __FILE__,__LINE__);
 	return false; 
 }
 
@@ -104,9 +104,10 @@ bool clear_block_array(const MultiPinMap * map, uint hwinstance){
 // Input: array to parse, MultiPinMap to scan for
 // Output: Hardware instance
 // Error: -1 if the block array is full. 
-int parse_block_array(MultiPinMap pins, MultiPinMap * array){
+int parse_block_array(MultiPinMap pins, MultiPinMap * array, int array_size){
 	int HWInstance = 0;
-	int NUM_HW_PERIPHERAL = sizeof(array)/sizeof(pins);
+	int NUM_HW_PERIPHERAL = array_size;
+	printf("\r\n     [LOG] NUM_HW_Peripherals is %d, line %d",NUM_HW_PERIPHERAL, __LINE__);
 	// loop through multimap peripheral array looking for blank spot.
 	for(HWInstance=0; HWInstance < NUM_HW_PERIPHERAL; HWInstance++ ){
 		// eq check to see if the pinmap is already recorded
@@ -130,7 +131,7 @@ int parse_block_array(MultiPinMap pins, MultiPinMap * array){
 	}
 	// See if buffer was full (ie no peripheral blocks available to assign to)
 	// if(HWInstance == NUM_HW_PERIPHERAL){
-		printf("[ERR] There are %d blocks available and all are full. File: %s, Line %d", NUM_HW_PERIPHERAL,__FILE__,__LINE__);
+		printf("\r\n    [ERR] There are %d blocks available and all are full. File: %s, Line %d", NUM_HW_PERIPHERAL,__FILE__,__LINE__);
 		return -1;
 	//}
 }
@@ -139,9 +140,10 @@ int parse_block_array(MultiPinMap pins, MultiPinMap * array){
 // Input : pins to look for in the predefined pinmap
 // Output: hardware instance
 // Error: -1 if the pins are not in the pinmap
-int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap){
+int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap, int array_size){
 	int HWInstance = 0;
-	int NUM_HW_PERIPHERAL = sizeof(pinmap)/sizeof(pins);
+	int NUM_HW_PERIPHERAL = array_size;
+	printf("\r\n     [LOG] NUM_HW_Peripherals is %d, line %d",NUM_HW_PERIPHERAL,__LINE__);
 	for(HWInstance = 0; HWInstance < NUM_HW_PERIPHERAL; HWInstance++){
 		if(		pins.Pin0 == pinmap[HWInstance].Pin0
 			 && pins.Pin1 == pinmap[HWInstance].Pin1
@@ -152,7 +154,7 @@ int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap){
 		}
 	}
 	// Searched entire array, no matches found, return error
-	printf("[ERR] MultiPinMap not found in pre-defined list. File: %s, Line %d", __FILE__,__LINE__);
+	printf("\r\n     [ERR] MultiPinMap {%d,%d,%d,%d} not found in pre-defined list. File: %s, Line %d", pins.Pin0, pins.Pin1, pins.Pin2, pins.Pin3,__FILE__,__LINE__);
 	return -1;
 }
 
@@ -163,27 +165,45 @@ int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap){
 // 2) Pinmaps are not defined, do best effort to allocate to hardware instance
 // 3) Pinmaps are defineed, but input is not in them. This is a user error and should not happen.
 int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
-	if(sizeof(map) == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
+	int size = -1;
+	printf("\r\n     [LOG] map address = %d, SPI = %d, I2C = %d", map, SPI_Pinmap, I2C_Pinmap);
+	if(map == SPI_Pinmap){
+		printf("\r\n     [LOG] SPI Detected");
+		size = sizeof(SPI_Pinmap);
+	} else if(map == I2C_Pinmap){
+		printf("\r\n     [LOG] I2C Detected");
+		size = sizeof(I2C_Pinmap);
+	} else if(map == UART_Pinmap){
+		printf("\r\n     [LOG] UART Detected");
+		size = sizeof(UART_Pinmap);
+	} else if(map == PWM_Pinmap){
+		printf("\r\n     [LOG] PWM Detected");
+		size = sizeof(PWM_Pinmap);
+	} 
+	printf("\r\n     [LOG] size of map %d = %d",map, size);
+
+	if(size == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
 		if(map == SPI_Pinmap){
-			return parse_block_array(pins, SPI_Blocks);
+			return parse_block_array(pins, SPI_Blocks, sizeof(SPI_Blocks)/sizeof(MultiPinMap));
 		}else if(map == I2C_Pinmap) {
-			return parse_block_array(pins, I2C_Blocks);
+			return parse_block_array(pins, I2C_Blocks, sizeof(I2C_Blocks)/sizeof(MultiPinMap));
 		}else if(map == UART_Pinmap) {
-			return parse_block_array(pins, UART_Blocks);
+			return parse_block_array(pins, UART_Blocks, sizeof(UART_Blocks)/sizeof(MultiPinMap));
 		}else if(map == PWM_Pinmap) {
-			return parse_block_array(pins, PWM_Blocks);
+			return parse_block_array(pins, PWM_Blocks, sizeof(PWM_Blocks)/sizeof(MultiPinMap));
 		}
 
 	}else{ // Pinmap defined, return instance from pinmap or error as approrpiate
 		if(map == SPI_Pinmap){
-			return parse_pinmap_array(pins, SPI_Pinmap);
-		}else if(map == I2C_Blocks){
-			return parse_pinmap_array(pins, I2C_Pinmap);
-		}else if(map == UART_Blocks){
-			return parse_pinmap_array(pins, UART_Pinmap);
-		}else if(map == PWM_Blocks){
-			return parse_pinmap_array(pins, PWM_Pinmap);
+			return parse_pinmap_array(pins, SPI_Pinmap, sizeof(SPI_Pinmap)/sizeof(MultiPinMap));
+		}else if(map == I2C_Pinmap){
+			return parse_pinmap_array(pins, I2C_Pinmap, sizeof(I2C_Pinmap)/sizeof(MultiPinMap));
+		}else if(map == UART_Pinmap){
+			return parse_pinmap_array(pins, UART_Pinmap, sizeof(UART_Pinmap)/sizeof(MultiPinMap));
+		}else if(map == PWM_Pinmap){
+			return parse_pinmap_array(pins, PWM_Pinmap, sizeof(PWM_Pinmap)/sizeof(MultiPinMap));
 		}
 	}
+	printf("\r\n     [ERR] Something has gone terribly wrong. %s %d", __FILE__, __LINE__);
 	return -1; // you only get here if there has been an error
 }
