@@ -32,6 +32,13 @@ typedef struct{
 	PinName Pin3;
 } MultiPinMap;
 
+typedef enum {
+	multipinmaptype_spi,
+	multipinmaptype_i2c,
+	multipinmaptype_uart,
+	multipinmaptype_pwm
+}MultiPinMapType ;
+
 extern const int spi_pinmap_size;
 extern const int i2c_pinmap_size;
 extern const int uart_pinmap_size;
@@ -42,7 +49,21 @@ extern const MultiPinMap I2C_Pinmap[];
 extern const MultiPinMap UART_Pinmap[];
 extern const MultiPinMap PWM_Pinmap[];
 
-int multi_peripheral(MultiPinMap pins, const MultiPinMap * map );
+// Hardare instances, #defined. Move to PinNames.h ?
+// Define as number of instances. Instances start at 0, but count starts at 1. So if there are 3 instances there will be instance0-instance2, but the #define below will be 3. 
+// TODO: fill in with correct defines
+#define NUM_HW_PERIPHERAL_SPI 3
+#define NUM_HW_PERIPHERAL_I2C 4
+#define NUM_HW_PERIPHERAL_UART 2
+#define NUM_HW_PERIPHERAL_PWM 5 
+
+extern MultiPinMap SPI_Blocks[];
+extern MultiPinMap I2C_Blocks[];
+extern MultiPinMap UART_Blocks[];
+extern MultiPinMap PWM_Blocks[];
+
+
+int multi_peripheral(MultiPinMap pins, const MultiPinMap * map, MultiPinMapType type);
 
 #ifdef __cplusplus
 }

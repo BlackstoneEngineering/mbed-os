@@ -50,52 +50,44 @@ void pin_mode(PinName pin, PinMode mode)
 #define DEBUG_PRINTF(...)
 #endif
 
-// Hardare instances, #defined. Move to PinNames.h ?
-// Define as number of instances. Instances start at 0, but count starts at 1. So if there are 3 instances there will be instance0-instance2, but the #define below will be 3. 
-// TODO: fill in with correct defines
-#define NUM_HW_PERIPHERAL_SPI 3
-#define NUM_HW_PERIPHERAL_I2C 4
-#define NUM_HW_PERIPHERAL_UART 2
-#define NUM_HW_PERIPHERAL_PWM 5 
-
 // Arrays to hold initialized hardware peripherals, use these if PeripheralPins.c is not implimented
-MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={{NC,NC,NC,NC}};
-MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 		={{NC,NC,NC,NC}};
-MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={{NC,NC,NC,NC}};
-MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={{NC,NC,NC,NC}};
+MultiPinMap SPI_Blocks[NUM_HW_PERIPHERAL_SPI]		={};
+MultiPinMap I2C_Blocks[NUM_HW_PERIPHERAL_I2C] 		={};
+MultiPinMap UART_Blocks[NUM_HW_PERIPHERAL_UART]  	={};
+MultiPinMap PWM_Blocks[NUM_HW_PERIPHERAL_PWM]		={};
 
 // Helper Function to dissasociate pinmap from array. Probable use is in a deconstructor. 
 // Input : 
 // Output : True (success), False (failure) - failures only happen if pins are not in pinmap array
-bool clear_block_array(const MultiPinMap * map, uint hwinstance){
+bool clear_block_array(MultiPinMapType type, uint hwinstance){
 	MultiPinMap blank = {NC,NC,NC,NC};
-	if(map == SPI_Pinmap){
+	if(type == multipinmaptype_spi){
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(SPI_Blocks))){
+		if(hwinstance < NUM_HW_PERIPHERAL_SPI){
 			SPI_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
 		}
-	}else if(map == I2C_Pinmap) {
+	}else if(type == multipinmaptype_i2c) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(I2C_Blocks))){
+		if(hwinstance < NUM_HW_PERIPHERAL_I2C){
 			I2C_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
 		}
-	}else if(map == UART_Pinmap) {
+	}else if(type == multipinmaptype_uart) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(UART_Blocks))){
+		if(hwinstance < NUM_HW_PERIPHERAL_UART){
 			UART_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
 			return false; 
 		}
-	}else if(map == PWM_Pinmap) {
+	}else if(type == multipinmaptype_pwm) {
 		// check that index is within bound of array
-		if(hwinstance < (sizeof(PWM_Blocks))){
+		if(hwinstance < NUM_HW_PERIPHERAL_PWM){
 			PWM_Blocks[hwinstance] = blank;
 			return true;
 		}else{ // hwinstance is out of bounds of array, this is an error
@@ -170,47 +162,59 @@ int parse_pinmap_array(MultiPinMap pins, const MultiPinMap * pinmap, int array_s
 // 1) Pinmaps are defined, return hardware instance from PeripheralPins.h
 // 2) Pinmaps are not defined, do best effort to allocate to hardware instance
 // 3) Pinmaps are defineed, but input is not in them. This is a user error and should not happen.
-int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
+int multi_peripheral(MultiPinMap pins, const MultiPinMap * map, MultiPinMapType type ){
 	int size = -1;
-	DEBUG_PRINTF("\r\n     [LOG] map address = %d, SPI = %d, I2C = %d", map, SPI_Pinmap, I2C_Pinmap);
-	if(map == SPI_Pinmap){
-		DEBUG_PRINTF("\r\n     [LOG] SPI Detected");
-		// size = sizeof(SPI_Pinmap);
-		size = spi_pinmap_size;
-	} else if(map == I2C_Pinmap){
-		DEBUG_PRINTF("\r\n     [LOG] I2C Detected");
-		// size = sizeof(I2C_Pinmap);
-		size = i2c_pinmap_size;
-	} else if(map == UART_Pinmap){
-		DEBUG_PRINTF("\r\n     [LOG] UART Detected");
-		// size = sizeof(UART_Pinmap);
-		size = uart_pinmap_size;
-	} else if(map == PWM_Pinmap){
-		DEBUG_PRINTF("\r\n     [LOG] PWM Detected");
-		// size = sizeof(PWM_Pinmap);
-		size = pwm_pinmap_size;
-	} 
-	DEBUG_PRINTF("\r\n     [LOG] size of map %d = %d",map, size);
+	DEBUG_PRINTF("\r\n     [LOG] map address = %d", map);
+	
+	switch(type){
+		case multipinmaptype_spi:
+			DEBUG_PRINTF("\r\n     [LOG] SPI Detected");
+			// size = sizeof(SPI_Pinmap);
+			size = spi_pinmap_size;
+			break;
+		
+		case multipinmaptype_i2c:
+			DEBUG_PRINTF("\r\n     [LOG] I2C Detected");
+			// size = sizeof(I2C_Pinmap);
+			size = i2c_pinmap_size;
+			break;
+		
+		case multipinmaptype_uart:
+			DEBUG_PRINTF("\r\n     [LOG] UART Detected");
+			// size = sizeof(UART_Pinmap);
+			size = uart_pinmap_size;
+			break;
+		
+		case multipinmaptype_pwm: 
+			DEBUG_PRINTF("\r\n     [LOG] PWM Detected");
+			// size = sizeof(PWM_Pinmap);
+			size = pwm_pinmap_size;
+			break;
+	}
+
+	DEBUG_PRINTF("\r\n     [LOG] size of pinmap for map %d = %d",map, size);
 
 	if(size == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
-		if(map == SPI_Pinmap){
-			return parse_block_array(pins, SPI_Blocks, spi_pinmap_size);
-		}else if(map == I2C_Pinmap) {
-			return parse_block_array(pins, I2C_Blocks, i2c_pinmap_size);
-		}else if(map == UART_Pinmap) {
-			return parse_block_array(pins, UART_Blocks, uart_pinmap_size);
-		}else if(map == PWM_Pinmap) {
-			return parse_block_array(pins, PWM_Blocks, pwm_pinmap_size);
+		DEBUG_PRINTF("\r\n     [LOG] Using Blocks");
+		if(type == multipinmaptype_spi){
+			return parse_block_array(pins, SPI_Blocks, NUM_HW_PERIPHERAL_SPI);
+		}else if(type == multipinmaptype_i2c) {
+			return parse_block_array(pins, I2C_Blocks, NUM_HW_PERIPHERAL_I2C);
+		}else if(type == multipinmaptype_uart) {
+			return parse_block_array(pins, UART_Blocks, NUM_HW_PERIPHERAL_UART);
+		}else if(type == multipinmaptype_pwm) {
+			return parse_block_array(pins, PWM_Blocks, NUM_HW_PERIPHERAL_PWM);
 		}
 
 	}else{ // Pinmap defined, return instance from pinmap or error as approrpiate
-		if(map == SPI_Pinmap){
+		DEBUG_PRINTF("\r\n     [LOG] Using Pinmap");
+		if(type == multipinmaptype_spi){
 			return parse_pinmap_array(pins, SPI_Pinmap, spi_pinmap_size);
-		}else if(map == I2C_Pinmap){
+		}else if(type == multipinmaptype_i2c){
 			return parse_pinmap_array(pins, I2C_Pinmap, i2c_pinmap_size);
-		}else if(map == UART_Pinmap){
+		}else if(type == multipinmaptype_uart){
 			return parse_pinmap_array(pins, UART_Pinmap, uart_pinmap_size);
-		}else if(map == PWM_Pinmap){
+		}else if(type == multipinmaptype_pwm){
 			return parse_pinmap_array(pins, PWM_Pinmap, pwm_pinmap_size);
 		}
 	}

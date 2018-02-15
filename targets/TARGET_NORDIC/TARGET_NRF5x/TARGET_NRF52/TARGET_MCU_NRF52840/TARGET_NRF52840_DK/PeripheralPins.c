@@ -16,9 +16,9 @@
 
 #include "pinmap.h"
 #include "PeripheralPins.h"
-// #include <mbed_toolchain.h>
+#include <mbed_toolchain.h>
 
-// Optional: Add Peripherals here
+// Optional: Add Peripherals like below to your application
 
 // //************SPI***************
 // const MultiPinMap SPI_Pinmap[]= {
@@ -28,26 +28,18 @@
 
 // //************I2C***************
 // const MultiPinMap I2C_Pinmap[]={
-// 	{I2C1_SDA, I2C1_SDL}, // I2C1 on Hardware Instance 1
-// 	{I2C2_SDA, I2C2_SDL}  // I2C2 on Hardware Instance 4
+// 	{I2C1_SDA, I2C1_SDL, NC, NC}, // I2C1 on Hardware Instance 1
+// 	{I2C2_SDA, I2C2_SDL, NC, NC}  // I2C2 on Hardware Instance 4
 
 // };
 
-const MultiPinMap SPI_Pinmap[] = { 
-									{NC,NC,NC,NC},
-									{D0,D1,D2,D3},
-									{D7,D8,D9,NC},
-									{D7,D2,D3,D0}
-								};
-const MultiPinMap I2C_Pinmap[] = {
-									{D1,D2,NC,NC},
-									{D0,D1,D2,D3}
-								};
-const MultiPinMap UART_Pinmap[] = {};
-const MultiPinMap PWM_Pinmap[] = {};
+MBED_WEAK const MultiPinMap SPI_Pinmap[] = {};
+MBED_WEAK const MultiPinMap I2C_Pinmap[] = {};
+MBED_WEAK const MultiPinMap UART_Pinmap[] = {};
+MBED_WEAK const MultiPinMap PWM_Pinmap[] = {};
 
 // calculate size of arrays,
-const int spi_pinmap_size = sizeof(SPI_Pinmap)/sizeof(MultiPinMap);
-const int i2c_pinmap_size = sizeof(I2C_Pinmap)/sizeof(MultiPinMap);
-const int uart_pinmap_size = sizeof(UART_Pinmap)/sizeof(MultiPinMap);
-const int pwm_pinmap_size = sizeof(PWM_Pinmap)/sizeof(MultiPinMap);
+MBED_WEAK const int spi_pinmap_size = sizeof(SPI_Pinmap)/sizeof(MultiPinMap);
+MBED_WEAK const int i2c_pinmap_size = sizeof(I2C_Pinmap)/sizeof(MultiPinMap);
+MBED_WEAK const int uart_pinmap_size = sizeof(UART_Pinmap)/sizeof(MultiPinMap);
+MBED_WEAK const int pwm_pinmap_size = sizeof(PWM_Pinmap)/sizeof(MultiPinMap);
