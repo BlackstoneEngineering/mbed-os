@@ -18,10 +18,6 @@
 #include "PeripheralPins.h"
 // #include <mbed_toolchain.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Optional: Add Peripherals here
 
 // //************SPI***************
@@ -37,12 +33,6 @@ extern "C" {
 
 // };
 
-const int spi_pinmap_size = 4;
-const int i2c_pinmap_size = 2;
-const int uart_pinmap_size = 0;
-const int pwm_pinmap_size = 0;
-
-
 const MultiPinMap SPI_Pinmap[] = { 
 									{NC,NC,NC,NC},
 									{D0,D1,D2,D3},
@@ -56,6 +46,8 @@ const MultiPinMap I2C_Pinmap[] = {
 const MultiPinMap UART_Pinmap[] = {};
 const MultiPinMap PWM_Pinmap[] = {};
 
-#ifdef __cplusplus
-}
-#endif
+// calculate size of arrays,
+const int spi_pinmap_size = sizeof(SPI_Pinmap)/sizeof(MultiPinMap);
+const int i2c_pinmap_size = sizeof(I2C_Pinmap)/sizeof(MultiPinMap);
+const int uart_pinmap_size = sizeof(UART_Pinmap)/sizeof(MultiPinMap);
+const int pwm_pinmap_size = sizeof(PWM_Pinmap)/sizeof(MultiPinMap);
