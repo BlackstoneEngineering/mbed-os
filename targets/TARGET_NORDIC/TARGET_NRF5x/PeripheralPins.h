@@ -32,41 +32,20 @@ typedef struct{
 	PinName Pin3;
 } MultiPinMap;
 
+extern const int spi_pinmap_size;
+extern const int i2c_pinmap_size;
+extern const int uart_pinmap_size;
+extern const int pwm_pinmap_size;
 
+extern const MultiPinMap SPI_Pinmap[];
+extern const MultiPinMap I2C_Pinmap[];
+extern const MultiPinMap UART_Pinmap[];
+extern const MultiPinMap PWM_Pinmap[];
 
 int multi_peripheral(MultiPinMap pins, const MultiPinMap * map );
-
-// Optional: Add Peripherals here
-/*
-//************SPI***************
-const MultiPinMap SPI_Pinmap[]= {
-	{SPI1_MOSI, SPI1_MISO, SPI1_SS, SPI1_SCLK},// SPI1 on Hardware Instance 0
-	{SPI2_MOSI, SPI2_MISO, SPI2_SS, SPI2_SCLK}
-};
-
-//************I2C***************
-const MultiPinMap I2C_Pinmap[]={
-	{I2C1_SDA, I2C1_SDL}, // I2C1 on Hardware Instance 1
-	{I2C2_SDA, I2C2_SDL}  // I2C2 on Hardware Instance 4
-
-};
-//*/
-
-const MultiPinMap SPI_Pinmap[] = { 
-									{NC,NC,NC,NC},
-									{D0,D1,D2,D3},
-									{D7,D8,D9,NC},
-									{D7,D2,D3,D0}
-								};
-const MultiPinMap I2C_Pinmap[] = {
-									{D1,D2,NC,NC},
-									{D0,D1,D2,D3}
-								};
-const MultiPinMap UART_Pinmap[] = {};
-const MultiPinMap PWM_Pinmap[] = {};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif //MBED_PERIPHERALPINS_H

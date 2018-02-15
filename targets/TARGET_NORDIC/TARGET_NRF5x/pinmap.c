@@ -169,39 +169,43 @@ int multi_peripheral(MultiPinMap pins, const MultiPinMap * map ){
 	printf("\r\n     [LOG] map address = %d, SPI = %d, I2C = %d", map, SPI_Pinmap, I2C_Pinmap);
 	if(map == SPI_Pinmap){
 		printf("\r\n     [LOG] SPI Detected");
-		size = sizeof(SPI_Pinmap);
+		// size = sizeof(SPI_Pinmap);
+		size = spi_pinmap_size;
 	} else if(map == I2C_Pinmap){
 		printf("\r\n     [LOG] I2C Detected");
-		size = sizeof(I2C_Pinmap);
+		// size = sizeof(I2C_Pinmap);
+		size = i2c_pinmap_size;
 	} else if(map == UART_Pinmap){
 		printf("\r\n     [LOG] UART Detected");
-		size = sizeof(UART_Pinmap);
+		// size = sizeof(UART_Pinmap);
+		size = uart_pinmap_size;
 	} else if(map == PWM_Pinmap){
 		printf("\r\n     [LOG] PWM Detected");
-		size = sizeof(PWM_Pinmap);
+		// size = sizeof(PWM_Pinmap);
+		size = pwm_pinmap_size;
 	} 
 	printf("\r\n     [LOG] size of map %d = %d",map, size);
 
 	if(size == 0){ // no custom pinmap found, keep track in the <Peripheral>_Blocks arrays
 		if(map == SPI_Pinmap){
-			return parse_block_array(pins, SPI_Blocks, sizeof(SPI_Blocks)/sizeof(MultiPinMap));
+			return parse_block_array(pins, SPI_Blocks, spi_pinmap_size);
 		}else if(map == I2C_Pinmap) {
-			return parse_block_array(pins, I2C_Blocks, sizeof(I2C_Blocks)/sizeof(MultiPinMap));
+			return parse_block_array(pins, I2C_Blocks, i2c_pinmap_size);
 		}else if(map == UART_Pinmap) {
-			return parse_block_array(pins, UART_Blocks, sizeof(UART_Blocks)/sizeof(MultiPinMap));
+			return parse_block_array(pins, UART_Blocks, uart_pinmap_size);
 		}else if(map == PWM_Pinmap) {
-			return parse_block_array(pins, PWM_Blocks, sizeof(PWM_Blocks)/sizeof(MultiPinMap));
+			return parse_block_array(pins, PWM_Blocks, pwm_pinmap_size);
 		}
 
 	}else{ // Pinmap defined, return instance from pinmap or error as approrpiate
 		if(map == SPI_Pinmap){
-			return parse_pinmap_array(pins, SPI_Pinmap, sizeof(SPI_Pinmap)/sizeof(MultiPinMap));
+			return parse_pinmap_array(pins, SPI_Pinmap, spi_pinmap_size);
 		}else if(map == I2C_Pinmap){
-			return parse_pinmap_array(pins, I2C_Pinmap, sizeof(I2C_Pinmap)/sizeof(MultiPinMap));
+			return parse_pinmap_array(pins, I2C_Pinmap, i2c_pinmap_size);
 		}else if(map == UART_Pinmap){
-			return parse_pinmap_array(pins, UART_Pinmap, sizeof(UART_Pinmap)/sizeof(MultiPinMap));
+			return parse_pinmap_array(pins, UART_Pinmap, uart_pinmap_size);
 		}else if(map == PWM_Pinmap){
-			return parse_pinmap_array(pins, PWM_Pinmap, sizeof(PWM_Pinmap)/sizeof(MultiPinMap));
+			return parse_pinmap_array(pins, PWM_Pinmap, pwm_pinmap_size);
 		}
 	}
 	printf("\r\n     [ERR] Something has gone terribly wrong. %s %d", __FILE__, __LINE__);
