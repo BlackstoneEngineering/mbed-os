@@ -21,7 +21,7 @@
 
 #include <mbed.h>
 #include "BlockDevice.h"
-//#include "./mbed-os/drivers/QSPI.h"
+#include "./mbed-os/drivers/QSPI.h"
 
 #define QSPIF_MAX_REGIONS	4
 
