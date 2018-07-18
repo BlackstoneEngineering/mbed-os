@@ -69,7 +69,8 @@
 #define QSPIF_DEBUG_INFO     3
 #define QSPIF_DEBUG_DEBUG     4
 #define QSPIF_DEBUG_TRACE     5
-#define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_INFO
+// #define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_INFO
+#define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_TRACE
 
 
 
@@ -94,7 +95,7 @@ enum qspif_default_instructions {
 
 #define QSPIF_LOG(level,...) {\
     	if (level <= QSPIF_DEFAULT_DEBUG_LEVEL) {\
-    	  char str[100];\
+    	  char str[256];\
       	  sprintf(str, "\n[%s][%s:%d], ", __FILENAME__, __FUNCTION__, __LINE__);\
             sprintf(str+strlen(str),__VA_ARGS__);\
       	  printf(str);\
@@ -564,7 +565,7 @@ int QSPIFBlockDevice::_sfdpParseBasicParamTable(uint32_t basic_table_addr, size_
     qspi_status_t status = _qspiSendReadCommand(QSPIF_SFDP, (char *)param_table, basic_table_addr /*address*/,
                            basic_table_size);
     if (status != QSPI_STATUS_OK) {
-        QSPIF_LOG(QSPIF_DEBUG_ERROR, "ERROR: init - Read SFDP First Table Failed");
+        QSPIF_LOG(QSPIF_DEBUG_ERROR, "ERROR: init - Read SFDP First Table Failed, Status %d",status);
         return -1;
     }
 
