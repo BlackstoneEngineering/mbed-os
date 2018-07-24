@@ -70,8 +70,8 @@
 #define QSPIF_DEBUG_DEBUG     4
 #define QSPIF_DEBUG_TRACE     5
 // #define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_INFO
-#define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_TRACE
-
+// #define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_TRACE
+#define QSPIF_DEFAULT_DEBUG_LEVEL  QSPIF_DEBUG_WARNING
 
 
 enum qspif_default_instructions {
@@ -303,7 +303,7 @@ int QSPIFBlockDevice::program(const void *buffer, bd_addr_t addr, bd_size_t size
 
         // Write on _pageSizeBytes boundaries (Default 256 bytes a page)
         offset = addr % _pageSizeBytes;
-        chunk = (offset + size < _pageSizeBytes) ? size : (_pageSizeBytes);
+        chunk = (offset + size < _pageSizeBytes) ? size : (_pageSizeBytes - offset);
         writtenBytes = chunk;
 
         _mutex->lock();
